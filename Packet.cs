@@ -60,14 +60,12 @@ namespace Hazelcast.Client
 				stream.Write (packetInBytes, 0, packetInBytes.Length);
 			}
 		}
-
-		public void read (Stream stream)
-		{
+        
+		public void Read(Stream stream)
+		{       
+                
 			    BinaryReader reader = new BinaryReader (stream);
                 int headerSize = IPAddress.NetworkToHostOrder(reader.ReadInt32());
-                if (headerSize == 0) { 
-                    
-                }
                 int keySize = IPAddress.NetworkToHostOrder(reader.ReadInt32());
                 int valueSize = IPAddress.NetworkToHostOrder(reader.ReadInt32());
                 int packetVersion = reader.ReadByte();
@@ -76,14 +74,7 @@ namespace Hazelcast.Client
                     //throw new Exception("Packet versions do not match. Expected " + PACKET_VERSION + " but found " + packetVersion); 
                 }
                 readHeader(reader);
-                if (callId == 0)
-                {
-                    Console.WriteLine("SIFIRRR     OP:" + operation + ", NAME: " + name + ",HS: " + headerSize + ", KS: " + keySize + ", VS: " + valueSize);
-                    Console.WriteLine(stream);
-                }
-                else { 
-                    //Console.WriteLine("OP:" + operation + ", NAME: " + name + ",HS: " + headerSize + ", KS: " + keySize + ", VS: " + valueSize); 
-                }
+                
                 try
                 {
                     this.key = new byte[keySize];
@@ -91,7 +82,13 @@ namespace Hazelcast.Client
                         reader.Read(this.key, 0, keySize);
                     this.value = new byte[valueSize];
                     if (valueSize > 0)
-                        reader.Read(this.value, 0, valueSize);
+                    {
+                        int x = reader.Read(this.value, 0, valueSize);
+                        if (x != valueSize) {
+                            Console.WriteLine("Esit degil: " + x + "::" + valueSize + "");
+                            Thread.Sleep(10000);
+                        }
+                    }
                 }catch (Exception e) {
                     Console.WriteLine("Keysize" + keySize + ": " + valueSize);
                     Console.WriteLine(e.StackTrace);

@@ -14,6 +14,9 @@ namespace Hazelcast.Client
         TcpClient tcpClient;
 		public Int64 lastReceived;
         bool headerRead = false;
+
+        Packet prev = null;
+        byte[] prevB = null;
 			
 		
 		
@@ -60,7 +63,7 @@ namespace Hazelcast.Client
 		
 		public Packet readPacket(TcpClient tcp){
         	Stream stream = tcp.GetStream();
-			if(!headerRead)
+			/*if(!headerRead)
 			{
 				byte[] header = new byte[3];
 				stream.Read(header, 0, 3);
@@ -68,12 +71,43 @@ namespace Hazelcast.Client
                     Console.WriteLine("Header is equal!");	
 				}
 				headerRead = true;
-			}
+			}*/
+            
 			Packet packet = new Packet();
-			packet.read(stream);	
+            byte[] bytes = new byte[1045];
+            stream.Read(bytes, 0, bytes.Length);
+            MemoryStream mstr = new MemoryStream(bytes);
+            mstr.Position = 0;
+            packet.Read(mstr);
+            Console.WriteLine("Packet " + packet.callId);
+
+            //if (packet.callId == 0)
+            //{
+                //Console.WriteLine("Prev");
+                //print(prev, prevB);
+                //Console.WriteLine("Current");
+                print(packet, bytes);
+                
+
+ //           }
+
+            this.prev = packet;
+            this.prevB = bytes;
 			return packet;
     	}
-		
+
+        public void print(Packet packet, byte[] bytes) {
+            Console.WriteLine("");
+            Console.WriteLine("Packet: " + packet.callId);
+
+            foreach (byte b in bytes)
+            {
+                Console.Write(b);
+                Console.Write(".");
+            }
+            if (packet.callId == 0)
+                Thread.Sleep(100000);  
+        }
 		
 		
 		

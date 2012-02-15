@@ -12,6 +12,9 @@ namespace Hazelcast.Client
     {
         public static void Main(string[] args)
         {
+            if (args.Length > 0) {
+                THREAD_COUNT = int.Parse(args[0]);
+            }
             Program program = new Program();
             program.Start();
 
@@ -62,10 +65,12 @@ namespace Hazelcast.Client
            
             for (int c=0; ; c++)
             {
+                Thread.Sleep(1000);
+                Console.WriteLine("OPERATION " + c);
                 Packet request = new Packet();
                 Random random = new Random(5);
                
-                byte[] key = new byte[100];
+                byte[] key = new byte[10];
                 byte[] val = new byte[1000];
                 random.NextBytes(key);
                 request.set("c:default", ClusterOperation.CONCURRENT_MAP_PUT, key, val);
@@ -88,9 +93,6 @@ namespace Hazelcast.Client
                     else {
                         Console.WriteLine("Call"  + call.getId() + " didn't get answer within "+ timeout*i/1000 + " seconds");
                     }
-                }
-                if(c%1000==0){
-                    Console.WriteLine("Thread" + Thread.CurrentThread.Name + ":" + c);  
                 }
             }
         }
